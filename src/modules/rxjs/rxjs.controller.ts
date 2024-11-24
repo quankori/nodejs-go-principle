@@ -5,7 +5,7 @@ import { RxjsService } from './rxjs.service';
 export class RxjsController {
   constructor(private readonly rxjsService: RxjsService) {}
 
-  @Get('observable')
+  @Get('')
   observable(): any {
     return this.rxjsService.observable();
   }

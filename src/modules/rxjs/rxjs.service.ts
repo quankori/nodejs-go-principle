@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Observable, Subject } from 'rxjs';
+import { filter, from, map, Observable, of, Subject } from 'rxjs';
 
 @Injectable()
 export class RxjsService {
@@ -10,6 +10,9 @@ export class RxjsService {
   // Hot Observable: An observable that emits values independently of subscriptions, sharing the same execution among all subscribers.
   // Cold Observable: An observable that starts emitting values anew for each subscriber, providing independent executions.
   // Marbles Diagram: https://rxmarbles.com/
+  // Creation Functions: Functions that create new Observables from various data sources.
+  // Pipeable Operators: Functions that transform or manipulate Observable data within a pipeline.
+  // Subjects: Special Observables that can multicast values to multiple subscribers.
   observable() {
     const observable$ = new Observable<string>((subscribe) => {
       subscribe.next('Quan');
@@ -27,34 +30,11 @@ export class RxjsService {
       complete: () => console.log('completed'),
       error: () => console.log('err'),
     });
+
     setTimeout(() => {
       console.log('Unsubscribe');
-      subscription.unsubscribe;
+      subscription.unsubscribe();
     }, 3000);
-
-    // ** Cold Observable Example **
-    // const coldObservable = this.cold();
-
-    // coldObservable.subscribe((value) => {
-    //   console.log('Cold Subscriber 1 received:', value);
-    // });
-
-    // coldObservable.subscribe((value) => {
-    //   console.log('Cold Subscriber 2 received:', value);
-    // });
-
-    // ** Hot Observable Example **
-    // const hotObservable = this.hot();
-
-    // hotObservable.subscribe((value) => {
-    //   console.log('Hot Subscriber 1 received:', value);
-    // });
-
-    // setTimeout(() => {
-    //   hotObservable.subscribe((value) => {
-    //     console.log('Hot Subscriber 2 received:', value);
-    //   });
-    // }, 2500);
   }
 
   /**
@@ -62,10 +42,19 @@ export class RxjsService {
    * Each subscriber gets its own independent execution.
    */
   cold() {
-    return new Observable((observer) => {
+    const coldObservable = new Observable((observer) => {
       console.log('Cold Observable: Executing for a new subscriber');
       observer.next(Math.random());
       observer.complete();
+    });
+
+    // ** Cold Observable Example **
+    coldObservable.subscribe((value) => {
+      console.log('Cold Subscriber 1 received:', value);
+    });
+
+    coldObservable.subscribe((value) => {
+      console.log('Cold Subscriber 2 received:', value);
     });
   }
 
@@ -74,6 +63,7 @@ export class RxjsService {
    * All subscribers share the same execution and receive the same data.
    */
   hot() {
+    // Subject empty
     const subject = new Subject();
 
     // Simulate data emission
@@ -83,6 +73,27 @@ export class RxjsService {
       subject.next(value);
     }, 1000);
 
-    return subject.asObservable();
+    const hotObservable = subject.asObservable();
+
+    hotObservable.subscribe((value) => {
+      console.log('Hot Subscriber 1 received:', value);
+    });
+
+    setTimeout(() => {
+      hotObservable.subscribe((value) => {
+        console.log('Hot Subscriber 2 received:', value);
+      });
+    }, 2500);
+  }
+
+  filter() {
+    const numbers = [1, 2, 3, 4, 5];
+    const observable$ = from(numbers).pipe(filter((value) => value % 2 === 0));
+
+    observable$.subscribe((value) => console.log(value));
+
+    const observableMap$ = of(1, 2, 3).pipe(map((value) => value * 10));
+
+    observableMap$.subscribe((value) => console.log(value));
   }
 }

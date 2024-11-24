@@ -5,5 +5,6 @@ import { RxjsController } from './rxjs.controller';
 @Module({
   controllers: [RxjsController],
   providers: [RxjsService],
+  exports: [RxjsService],
 })
 export class RxjsModule {}
